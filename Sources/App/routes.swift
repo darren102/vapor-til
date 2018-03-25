@@ -88,11 +88,11 @@ public func routes(_ router: Router) throws {
                                                     throw Abort(.badRequest)
                 }
                 // 1
-                return Acronym.query(on: req).group(.or) { or in
+                return try Acronym.query(on: req).group(.or) { or in
                     // 2
-                    or.filter(\.short == searchTerm)
+                    try or.filter(\.short == searchTerm)
                     // 3
-                    or.filter(\.long == searchTerm)
+                    try or.filter(\.long == searchTerm)
                     // 4
                 }.all()
     }
@@ -117,7 +117,7 @@ public func routes(_ router: Router) throws {
                "acronyms",
                "sorted") { req -> Future<[Acronym]> in
                 // 2
-                return Acronym.query(on: req)
+                return try Acronym.query(on: req)
                     .sort(\.short, .ascending)
                     .all()
     }
