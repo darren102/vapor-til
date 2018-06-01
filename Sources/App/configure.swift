@@ -39,7 +39,6 @@ public func configure(
   _ env: inout Environment,
   _ services: inout Services
 ) throws {
-
   // Register providers first
   try services.register(FluentPostgreSQLProvider())
   try services.register(LeafProvider())
@@ -61,10 +60,25 @@ public func configure(
   var databases = DatabasesConfig()
   let hostname = Environment.get("DATABASE_HOSTNAME") ?? "localhost"
   let username = Environment.get("DATABASE_USER") ?? "vapor"
-  let databaseName = Environment.get("DATABASE_DB") ?? "vapor"
+
+  let databaseName: String
+  let databasePort: Int
+  if (env == .testing) {
+    databaseName = "vapor-test"
+    if let testPort = Environment.get("DATABASE_PORT") {
+      databasePort = Int(testPort) ?? 5433
+    } else {
+      databasePort = 5433
+    }
+  }
+  else {
+    databaseName = Environment.get("DATABASE_DB") ?? "vapor"
+    databasePort = 5432
+  }
   let password = Environment.get("DATABASE_PASSWORD") ?? "password"
   let databaseConfig = PostgreSQLDatabaseConfig(
     hostname: hostname,
+    port: databasePort,
     username: username,
     database: databaseName,
     password: password)
@@ -83,11 +97,8 @@ public func configure(
   services.register(migrations)
 
   // Configure the rest of your application here
-  // 1
   var commandConfig = CommandConfig.default()
-  // 2
   commandConfig.use(RevertCommand.self, as: "revert")
-  // 3
   services.register(commandConfig)
 
   config.prefer(LeafRenderer.self, for: ViewRenderer.self)

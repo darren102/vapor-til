@@ -53,9 +53,7 @@ final class UserTests : XCTestCase {
     let user = try User.create(name: usersName, username: usersUsername, on: conn)
     _ = try User.create(on: conn)
 
-    let users = try app.getResponse(
-        to: usersURI,
-        decodeTo: [User.Public].self)
+    let users = try app.getResponse(to: usersURI, decodeTo: [User.Public].self)
 
     XCTAssertEqual(users.count, 3)
     XCTAssertEqual(users[1].name, usersName)
@@ -64,26 +62,14 @@ final class UserTests : XCTestCase {
   }
 
   func testUserCanBeSavedWithAPI() throws {
-    let user = User(
-        name: usersName,
-        username: usersUsername,
-        password: "password")
-
-    let receivedUser = try app.getResponse(
-        to: usersURI,
-        method: .POST,
-        headers: ["Content-Type": "application/json"],
-        data: user,
-        decodeTo: User.Public.self,
-        loggedInRequest: true)
+    let user = User(name: usersName, username: usersUsername, password: "password")
+    let receivedUser = try app.getResponse(to: usersURI, method: .POST, headers: ["Content-Type": "application/json"], data: user, decodeTo: User.Public.self, loggedInRequest: true)
 
     XCTAssertEqual(receivedUser.name, usersName)
     XCTAssertEqual(receivedUser.username, usersUsername)
     XCTAssertNotNil(receivedUser.id)
 
-    let users = try app.getResponse(
-        to: usersURI,
-        decodeTo: [User.Public].self)
+    let users = try app.getResponse(to: usersURI, decodeTo: [User.Public].self)
 
     XCTAssertEqual(users.count, 2)
     XCTAssertEqual(users[1].name, usersName)
@@ -93,9 +79,7 @@ final class UserTests : XCTestCase {
 
   func testGettingASingleUserFromTheAPI() throws {
     let user = try User.create(name: usersName, username: usersUsername, on: conn)
-    let receivedUser = try app.getResponse(
-        to: "\(usersURI)\(user.id!)",
-        decodeTo: User.Public.self)
+    let receivedUser = try app.getResponse(to: "\(usersURI)\(user.id!)", decodeTo: User.Public.self)
     XCTAssertEqual(receivedUser.name, usersName)
     XCTAssertEqual(receivedUser.username, usersUsername)
     XCTAssertEqual(receivedUser.id, user.id)
